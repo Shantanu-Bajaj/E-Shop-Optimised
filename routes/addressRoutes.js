@@ -53,7 +53,7 @@ addressRouter.post(
             line_1: req.body.line_1,
             line_2: req.body.line_2,
             city: req.body.city,
-            pincode: req.body.pimcode,
+            pincode: req.body.pincode,
             state: req.body.state,
             country: req.body.country,
           },
