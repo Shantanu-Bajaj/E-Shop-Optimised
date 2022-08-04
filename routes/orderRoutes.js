@@ -3,6 +3,7 @@ const orderRouter = express.Router();
 import con from "../db.js";
 import util from "util";
 const query = util.promisify(con.query).bind(con);
+import transporter from "../triggerEmail.js";
 
 orderRouter.get("/", (req, res) => {
   var sql =
@@ -321,8 +322,21 @@ orderRouter.post("/order", async (req, res) => {
       orderitems.forEach((item) => {
         lastorder["amount"] += item.total;
       });
+
+      let mailOptions = {
+        from: 'youremail@gmail.com',
+        to: 'myfriend@yahoo.com',
+        subject: 'Order Placed',
+        html: `<h3><p>Your order has been placed! It will arrive in 5-6 working days. If not feel free to contact us.</p> <p>Thank you for shopping with us.</p> <p>Have a good day!</p></h3>`
+      };
       
-      res.status(200).send({ message: "Order placed", data: lastorder });
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          res.send(error)
+        } else {
+          res.status(200).send({ message: "Order placed! An email has been sent to you.", data: lastorder});
+        }
+      });
   }
 });
 
@@ -336,7 +350,7 @@ orderRouter.get("/allorders", async (req, res) => {
     let orsql =
       "SELECT * FROM orderitems where order_id = '" + orders[i].id + "'";
     let order_items = await query(orsql);
-    let addsql = "SELECT * FROM useraddresses WHERE id= '" + orders[i].id + "'";
+    let addsql = "SELECT * FROM useraddresses WHERE id= '" + orders[i].address_id + "'";
     req.decoded.data.user_id + "'";
     let address = await query(addsql);
     // if (err) throw err;
