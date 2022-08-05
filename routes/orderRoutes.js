@@ -197,146 +197,168 @@ orderRouter.post("/order", async (req, res) => {
   let cartresult = await query(sql);
   if (!cartresult.length) res.status(400).send({ err: "Cart is Empty" });
   else {
-    var ordersql =
-      "INSERT INTO orders (user_id, address_id) VALUES ('" +
-      req.decoded.data.user_id +
-      "', '" +
-      req.query.address_id +
-      "')";
-    let orderresult = await query(ordersql);
-    var oritemssql =
-      "SELECT id FROM orders WHERE user_id = '" +
+    var addsql =
+      "SELECT id FROM useraddresses WHERE user_id ='" +
       req.decoded.data.user_id +
       "'";
-    let orderid = await query(oritemssql);
-    for (let i = 0; i < cartresult.length; i++) {
-      var sql1 =
-        "SELECT * FROM products WHERE prod_id='" + cartresult[i].prod_id + "'";
-      let prodresult = await query(sql1);
-      if (!prodresult.length)
-        res.status(404).send({ err: "currently unavailable" });
-      else {
-        if (cartresult[i].options) {
-          var prodOptions = JSON.parse(prodresult[0].options);
-          var cartOptions = JSON.parse(cartresult[i].options);
-          if (prodOptions.hasOwnProperty(cartOptions.prod_color)) {
-            if (
-              prodOptions[cartOptions.prod_color].hasOwnProperty(
-                cartOptions.prod_size
-              )
-            ) {
+    let addresses = await query(addsql);
+    let addressesid = [];
+    for (let i = 0; i < addresses.length; i++) {
+      addressesid[i] = addresses[i].id.toString();
+    }
+    if (addressesid.includes(req.query.address_id)) {
+      var ordersql =
+        "INSERT INTO orders (user_id, address_id) VALUES ('" +
+        req.decoded.data.user_id +
+        "', '" +
+        req.query.address_id +
+        "')";
+      let orderresult = await query(ordersql);
+      var oritemssql =
+        "SELECT id FROM orders WHERE user_id = '" +
+        req.decoded.data.user_id +
+        "'";
+      let orderid = await query(oritemssql);
+      for (let i = 0; i < cartresult.length; i++) {
+        var sql1 =
+          "SELECT * FROM products WHERE prod_id='" +
+          cartresult[i].prod_id +
+          "'";
+        let prodresult = await query(sql1);
+        if (!prodresult.length)
+          res.status(404).send({ err: "currently unavailable" });
+        else {
+          if (cartresult[i].options) {
+            var prodOptions = JSON.parse(prodresult[0].options);
+            var cartOptions = JSON.parse(cartresult[i].options);
+            if (prodOptions.hasOwnProperty(cartOptions.prod_color)) {
               if (
-                prodOptions[cartOptions.prod_color][cartOptions.prod_size][
-                  "quantity"
-                ] >= cartOptions.prod_quantity
+                prodOptions[cartOptions.prod_color].hasOwnProperty(
+                  cartOptions.prod_size
+                )
               ) {
-                var amount =
-                  cartOptions.prod_quantity * cartresult[i].prod_price;
-                var SQL =
-                  "INSERT INTO orderitems(order_id, prod_name, prod_quantity, prod_price, options, total) VALUES('" +
-                  orderid[orderid.length - 1].id +
-                  "','" +
-                  prodresult[0].name +
-                  "','" +
-                  cartOptions.prod_quantity +
-                  "','" +
-                  cartresult[i].prod_price +
-                  "','" +
-                  JSON.stringify(cartOptions) +
-                  "','" +
-                  amount +
-                  "')";
-                let orderitemsresult = await query(SQL);
-                var newQuantity =
+                if (
                   prodOptions[cartOptions.prod_color][cartOptions.prod_size][
                     "quantity"
-                  ] - cartOptions.prod_quantity;
-                prodOptions[cartOptions.prod_color][cartOptions.prod_size][
-                  "quantity"
-                ] = newQuantity;
-                var prodsql =
-                  "UPDATE products SET options='" +
-                  JSON.stringify(prodOptions) +
-                  "' WHERE prod_id='" +
-                  cartresult[i].prod_id +
-                  "'";
-                let productresult = await query(prodsql);
-
-                var cartsql =
-                  "DELETE FROM cart WHERE id='" + cartresult[i].id + "'";
-                let cartdeleteresult = await query(cartsql);
+                  ] >= cartOptions.prod_quantity
+                ) {
+                  var amount =
+                    cartOptions.prod_quantity * cartresult[i].prod_price;
+                  var SQL =
+                    "INSERT INTO orderitems(order_id, prod_name, prod_quantity, prod_price, options, total) VALUES('" +
+                    orderid[orderid.length - 1].id +
+                    "','" +
+                    prodresult[0].name +
+                    "','" +
+                    cartOptions.prod_quantity +
+                    "','" +
+                    cartresult[i].prod_price +
+                    "','" +
+                    JSON.stringify(cartOptions) +
+                    "','" +
+                    amount +
+                    "')";
+                  let orderitemsresult = await query(SQL);
+                  var newQuantity =
+                    prodOptions[cartOptions.prod_color][cartOptions.prod_size][
+                      "quantity"
+                    ] - cartOptions.prod_quantity;
+                  prodOptions[cartOptions.prod_color][cartOptions.prod_size][
+                    "quantity"
+                  ] = newQuantity;
+                  var prodsql =
+                    "UPDATE products SET options='" +
+                    JSON.stringify(prodOptions) +
+                    "' WHERE prod_id='" +
+                    cartresult[i].prod_id +
+                    "'";
+                  let productresult = await query(prodsql);
+                  var cartsql =
+                    "DELETE FROM cart WHERE id='" + cartresult[i].id + "'";
+                  let cartdeleteresult = await query(cartsql);
+                } else {
+                  res.status(400).send({ err: "Quantity Exceeded" });
+                }
               } else {
-                res.status(400).send({ err: "Quantity Exceeded" });
+                res.status(404).send({ err: "currently unavailable" });
               }
             } else {
               res.status(404).send({ err: "currently unavailable" });
             }
           } else {
-            res.status(404).send({ err: "currently unavailable" });
-          }
-        } else {
-          if (cartresult[i].prod_quantity <= prodresult[0].stock) {
-            var amount = cartresult[i].prod_quantity * cartresult[i].prod_price;
-            var SQL =
-              "INSERT INTO orderitems(order_id, prod_name, prod_quantity, prod_price, total) VALUES('" +
-              orderid[orderid.length - 1].id +
-              "','" +
-              prodresult[0].name +
-              "','" +
-              cartresult[i].prod_quantity +
-              "','" +
-              cartresult[i].prod_price +
-              "','" +
-              amount +
-              "')";
-            let orderitemsresult = await query(SQL);
-            var newQuantity = prodresult[0].stock - cartresult[i].prod_quantity;
-            prodresult[0].stock = newQuantity;
-            var prodsql =
-              "UPDATE products SET stock='" +
-              prodresult[0].stock +
-              "' WHERE prod_id='" +
-              cartresult[i].prod_id +
-              "'";
-            let updateprodsql = await query(prodsql);
-
-            var cartsql =
-              "DELETE FROM cart WHERE id='" + cartresult[i].id + "'";
-            let deletecartsql = await query(cartsql);
-          } else {
-            res.status(400).send({ err: "Quantity Exceeded" });
+            if (cartresult[i].prod_quantity <= prodresult[0].stock) {
+              var amount =
+                cartresult[i].prod_quantity * cartresult[i].prod_price;
+              var SQL =
+                "INSERT INTO orderitems(order_id, prod_name, prod_quantity, prod_price, total) VALUES('" +
+                orderid[orderid.length - 1].id +
+                "','" +
+                prodresult[0].name +
+                "','" +
+                cartresult[i].prod_quantity +
+                "','" +
+                cartresult[i].prod_price +
+                "','" +
+                amount +
+                "')";
+              let orderitemsresult = await query(SQL);
+              var newQuantity =
+                prodresult[0].stock - cartresult[i].prod_quantity;
+              prodresult[0].stock = newQuantity;
+              var prodsql =
+                "UPDATE products SET stock='" +
+                prodresult[0].stock +
+                "' WHERE prod_id='" +
+                cartresult[i].prod_id +
+                "'";
+              let updateprodsql = await query(prodsql);
+              var cartsql =
+                "DELETE FROM cart WHERE id='" + cartresult[i].id + "'";
+              let deletecartsql = await query(cartsql);
+            } else {
+              res.status(400).send({ err: "Quantity Exceeded" });
+            }
           }
         }
       }
-    }
-    let orders = [];
-      let lastorder = []
+      let orders = [];
+      let lastorder = [];
       var sql =
-      "SELECT * FROM orders WHERE user_id = '" + req.decoded.data.user_id + "'";
+        "SELECT * FROM orders WHERE user_id = '" +
+        req.decoded.data.user_id +
+        "'";
       orders = await query(sql);
-      lastorder = orders[orders.length-1]
+      lastorder = orders[orders.length - 1];
       let oritemsql =
-      "SELECT * FROM orderitems where order_id = '" + lastorder.id + "'";
+        "SELECT * FROM orderitems where order_id = '" + lastorder.id + "'";
       let orderitems = await query(oritemsql);
-      lastorder["items"] = orderitems
+      lastorder["items"] = orderitems;
       orderitems.forEach((item) => {
         lastorder["amount"] += item.total;
       });
-
       let mailOptions = {
-        from: 'youremail@gmail.com',
-        to: 'myfriend@yahoo.com',
-        subject: 'Order Placed',
-        html: `<h3><p>Your order has been placed! It will arrive in 5-6 working days. If not feel free to contact us.</p> <p>Thank you for shopping with us.</p> <p>Have a good day!</p></h3>`
+        from: "youremail@gmail.com",
+        to: "myfriend@yahoo.com",
+        subject: "Order Placed",
+        html: `<h3><p>Your order has been placed! It will arrive in 5-6 working days. If not feel free to contact us.</p> <p>Thank you for shopping with us.</p> <p>Have a good day!</p></h3>`,
       };
-      
-      transporter.sendMail(mailOptions, function(error, info){
+      transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-          res.send(error)
+          res.send(error);
         } else {
-          res.status(200).send({ message: "Order placed! An email has been sent to you.", data: lastorder});
+          res
+            .status(200)
+            .send({
+              message: "Order placed! An email has been sent to you.",
+              data: lastorder,
+            });
         }
       });
+    } else {
+      res
+        .status(404)
+        .send({ err: "No such address found! Please add a new address" });
+    }
   }
 });
 
@@ -350,7 +372,8 @@ orderRouter.get("/allorders", async (req, res) => {
     let orsql =
       "SELECT * FROM orderitems where order_id = '" + orders[i].id + "'";
     let order_items = await query(orsql);
-    let addsql = "SELECT * FROM useraddresses WHERE id= '" + orders[i].address_id + "'";
+    let addsql =
+      "SELECT * FROM useraddresses WHERE id= '" + orders[i].address_id + "'";
     req.decoded.data.user_id + "'";
     let address = await query(addsql);
     // if (err) throw err;
