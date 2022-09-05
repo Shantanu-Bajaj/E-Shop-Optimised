@@ -6,6 +6,13 @@ import dotenv from "dotenv";
 const openRouter = express.Router();
 dotenv.config();
 
+openRouter.get("/allproducts", (req, res) => {
+  var sql = "SELECT * FROM products";
+  con.query(sql, function (err, result) {
+    if (err) throw err;
+    res.status(200).send(result);
+  })
+})
 
 openRouter.post("/user/register", (req, res) => {
   var sqll = "SELECT email FROM users WHERE email='" + req.body.email + "'";

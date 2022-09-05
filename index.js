@@ -9,13 +9,15 @@ import orderRouter from "./routes/orderRoutes.js";
 import adminProductRouter from "./routes/adminProductRoutes.js";
 import userAuthentication from "./middlewares/userAuthentication.js";
 import adminAuthentication from "./middlewares/adminAuthentication.js";
-import openRouter from "./routes/openRoutes.js"
+import openRouter from "./routes/openRoutes.js";
+import multer from "multer";
 
 dotenv.config();
 const port = process.env.PORT || 8080;
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(multer().array());
 app.use(cors());
 
 app.use('/',openRouter)
