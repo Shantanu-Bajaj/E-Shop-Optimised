@@ -53,7 +53,7 @@ openRouter.post("/user/register", (req, res) => {
   });
 });
 
-openRouter.get("/user/login", (req, res) => {
+openRouter.post("/user/login", (req, res) => {
   if (req.body.email && req.body.password) {
     var sql =
       "SELECT * FROM users WHERE email = '" +
@@ -95,7 +95,7 @@ openRouter.get("/user/login", (req, res) => {
   }
 });
 
-openRouter.get("/admin/login", (req, res) => {
+openRouter.post("/admin/login", (req, res) => {
   if (req.body.email && req.body.password) {
     var sql =
       "SELECT * FROM admins WHERE email = '" +
