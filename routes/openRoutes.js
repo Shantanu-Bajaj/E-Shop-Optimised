@@ -88,11 +88,13 @@ openRouter.post("/user/login", (req, res) => {
             phone: result[0].phone,
           },
         });
-      } else res.status(401).send({ err: "Invalid Credentials" });
+      } 
+      //else res.status(401).send({ err: "Invalid Credentials" });
     });
-  } else {
-    res.status(204).send({ err: "Enter email or password" });
-  }
+  } 
+  // else {
+  //   res.status(204).send({ err: "Enter email or password" });
+  // }
 });
 
 openRouter.post("/admin/login", (req, res) => {
