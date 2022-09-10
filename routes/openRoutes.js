@@ -91,7 +91,7 @@ openRouter.post("/user/login", (req, res) => {
       } else res.status(401).send({ err: "Invalid Credentials" });
     });
   } else {
-    res.status(204).send({ err: "Credentials missing" });
+    res.status(400).send({ err: "Credentials missing" });
   }
 });
 
