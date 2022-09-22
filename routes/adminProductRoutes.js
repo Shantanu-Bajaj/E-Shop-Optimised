@@ -6,9 +6,11 @@ adminProductRouter.post(
   "/add",
   (req, res) => {
     var sql =
-      "INSERT INTO products (name,category,description,price,quantity,unit,stock,options) values('" +
+      "INSERT INTO products (name,image_id,category,description,price,quantity,unit,stock,options) values('" +
       req.body.name +
       "', '" +
+      req.body.image_id +
+      "','" +
       req.body.category +
       "', '" +
       req.body.description +
@@ -126,6 +128,14 @@ adminProductRouter.put(
     }
   }
 );
+
+adminProductRouter.get("/:prod_id", (req,res)=>{
+  let sql = "SELECT * FROM products where prod_id ='" + req.params.prod_id + "'";
+  con.query(sql,function(err,result){
+    if (err) throw err;
+    res.status(200).send(result);
+  })
+})
 
 adminProductRouter.get(
   "/all",
