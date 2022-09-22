@@ -1,3 +1,4 @@
+import e from "express";
 import express from "express";
 const adminProductRouter = express.Router();
 import con from "../db.js"
@@ -130,11 +131,18 @@ adminProductRouter.put(
 );
 
 adminProductRouter.get("/:prod_id", (req,res)=>{
-  let sql = "SELECT * FROM products where prod_id ='" + req.params.prod_id + "'";
-  con.query(sql,function(err,result){
-    if (err) throw err;
-    res.status(200).send(result);
-  })
+  if(!req.params)
+  {
+    res.status(200).send("Enter product id");
+  }
+  else
+  {
+    let sql = "SELECT * FROM products where prod_id ='" + req.params.prod_id + "'";
+    con.query(sql,function(err,result){
+      if (err) throw err;
+      res.status(200).send(result);
+    })
+  }
 })
 
 adminProductRouter.get(
