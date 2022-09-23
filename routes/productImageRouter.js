@@ -6,7 +6,7 @@ import fs from "fs";
 const productImageRouter = express.Router();
 const query = util.promisify(con.query).bind(con);
         
-productImageRouter.post("/:prod_id/add", (req,res) => {
+productImageRouter.post("/:prod_id/add", async (req,res) => {
     if(!req.params.prod_id)
     {
         res.status(200).send({err:"please enter product id"});
@@ -21,7 +21,13 @@ productImageRouter.post("/:prod_id/add", (req,res) => {
         fs.writeFile(name + "." + file_ext , data, function(err)  {
             if (err) throw err;
             console.log('Saved!');
-          }); 
+        }); 
+
+        let imagesql = "INSERT INTO images(prod_id,image_extension) VALUES('" + req.params.prod_id + "','" + file_ext + "')";
+        let imageresult = await query(imagesql);
+
+        res.status(200).send("Success");
+        
         
     }
 
