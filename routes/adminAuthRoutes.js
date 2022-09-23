@@ -14,6 +14,8 @@ adminAuthRouter.get("/", (req, res) => {
 });
 });
 
+
+
 adminAuthRouter.get("/allusers", (req, res) => {
   con.query("SELECT user_id, name, email, phone FROM users", function (err, result, fields) {
     if (err) throw err;

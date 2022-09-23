@@ -1,4 +1,3 @@
-import e from "express";
 import express from "express";
 const adminProductRouter = express.Router();
 import con from "../db.js"
@@ -130,6 +129,17 @@ adminProductRouter.put(
   }
 );
 
+adminProductRouter.get(
+  "/allprod",
+  (req, res) => {
+    let sql = "SELECT * FROM products";
+    con.query(sql, function (err, prodresult) {
+      if (err) throw err;
+      res.send(prodresult);
+    });
+  }
+);
+
 adminProductRouter.get("/:prod_id", (req,res)=>{
   if(!req.params)
   {
@@ -145,14 +155,6 @@ adminProductRouter.get("/:prod_id", (req,res)=>{
   }
 })
 
-adminProductRouter.get(
-  "/all",
-  (req, res) => {
-    con.query("SELECT * FROM products", function (err, result, fields) {
-      if (err) throw err;
-      res.send(result);
-    });
-  }
-);
+
 
 export default adminProductRouter;
