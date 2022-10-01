@@ -6,11 +6,9 @@ adminProductRouter.post(
   "/add",
   (req, res) => {
     var sql =
-      "INSERT INTO products (name,image_id,category,description,price,quantity,unit,stock,options) values('" +
+      "INSERT INTO products (name,category,description,price,quantity,unit,stock,options) values('" +
       req.body.name +
       "', '" +
-      req.body.image_id +
-      "','" +
       req.body.category +
       "', '" +
       req.body.description +
@@ -27,7 +25,11 @@ adminProductRouter.post(
       "')";
     con.query(sql, function (err, result) {
       if (err) throw err;
-      res.status(200).send({ message: "success" });
+      let addsql = "SELECT * FROM products where prod_id ='" + result.insertId + "'";
+      con.query(addsql, (err,addresult) => {
+        if (err) throw err;
+        res.status(200).send({ message: "success",data:addresult});
+      })
     });
   }
 );
@@ -97,7 +99,11 @@ adminProductRouter.put(
                 "'";
               con.query(sql, function (err, result) {
                 if (err) throw err;
-                res.status(200).send({ message: "success" });
+                let editsql = "SELECT * FROM products where prod_id='" + req.query.prod_id + "'";
+                con.query(editsql,function(err,editresult){
+                  if (err) throw err;
+                  res.status(200).send({ message: "success",data:editresult});
+                })
               });
             }
           } else {
@@ -117,7 +123,11 @@ adminProductRouter.put(
                 "'";
               con.query(sql, function (err, result) {
                 if (err) throw err;
-                res.status(200).send({ message: "success" });
+                let editsql = "SELECT * FROM products where prod_id='" + req.query.prod_id + "'";
+                con.query(editsql,function(err,editresult){
+                  if (err) throw err;
+                  res.status(200).send({ message: "success",data:editresult});
+                })
               });
             });
           }
