@@ -15,33 +15,30 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
   {
     let prodsql = "SELECT * FROM products where prod_id='" + req.params.prod_id + "'";
     let prodresult = await query(prodsql);
+    let prodoptions = JSON.parse(prodresult[0].options);
     if (!prodresult.length) res.status(404).send({ err: "not found" });
     else {
       let files = req.files;
       for (let i = 0; i < files.length; i++) 
       {
-        console.log(files[i].fieldname);
         let file_array = files[i].fieldname.split(".");
-        console.log(file_array);
+        let file_ext = files[i].originalname.split(".")[1];
+        let name = files[i].fieldname;
+        let data = files[i].buffer;
         let inpoptions = file_array.reduceRight((all, item) => ({ [item]: all }),{});
-        if (prodresult.options) 
+        if (prodoptions != "undefined") 
         {
-
+          console.log(inpoptions);
         } 
         else 
         {
-          let file_ext = files[i].originalname.split(".")[1];
-          let name = files[i].fieldname;
-          let data = files[i].buffer;
-          console.log(file_ext);
-          // var path ="D:OrtiganInternshipE-Shop-OptimisedprodImages " +req.files[0].fieldname;
+          // var path ="D:OrtiganInternshipE-Shop-OptimisedprodImages " +req.files[0].fieldname;          
+          let imagesql = "INSERT INTO images(prod_id,image_extension) VALUES('" +req.params.prod_id +"','" +file_ext +"')";
+          let imageresult = await query(imagesql);
           fs.writeFile(name + "." + file_ext, data, function (err) {
             if (err) throw err;
             console.log("Saved!");
           });
-
-          let imagesql = "INSERT INTO images(prod_id,image_extension) VALUES('" +req.params.prod_id +"','" +file_ext +"')";
-          let imageresult = await query(imagesql);
 
         }
       }

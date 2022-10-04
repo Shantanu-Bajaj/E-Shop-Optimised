@@ -4,6 +4,7 @@ import con from "../db.js";
 import util from "util";
 const query = util.promisify(con.query).bind(con);
 import transporter from "../triggerEmail.js";
+import { CLIENT_RENEG_LIMIT } from "tls";
 
 orderRouter.get("/", (req, res) => {
   var sql =
@@ -53,40 +54,85 @@ orderRouter.post("/add", (req, res) => {
       con.query(query, function (err, result) {
         if (err) throw err;
         var options = JSON.parse(result[0].options);
-        if (options.hasOwnProperty(req.body.options.prod_color)) {
-          if (
-            options[req.body.options.prod_color].hasOwnProperty(
-              req.body.options.prod_size
-            )
-          ) {
-            if (
-              options[req.body.options.prod_color][req.body.options.prod_size][
-                "quantity"
-              ] >= req.body.options.prod_quantity
-            ) {
-              var sql =
-                "INSERT INTO cart (user_id,prod_id, prod_price, options) VALUES ('" +
-                req.decoded.data.user_id +
-                "','" +
-                req.body.prod_id +
-                "','" +
-                result[0].price +
-                "','" +
-                JSON.stringify(req.body.options) +
-                "')";
-              con.query(sql, function (err, results) {
-                if (err) throw err;
-                res.status(200).send({ message: "success" });
-              });
-            } else {
-              res.status(400).send({ err: "Quantity Exceeded" });
-            }
-          } else {
-            res.status(404).send({ err: "not found" });
-          }
-        } else {
-          res.status(404).send({ err: "not found" });
-        }
+        console.log(options);
+        console.log("\n");
+
+        console.log(Object.keys(options));
+        console.log("\n");
+        
+        console.log(Object.values(options));
+        console.log("\n");
+
+        // console.log(Object.keys(options)[0]);
+        // console.log("\n");
+
+        // console.log(Object.values(options)[0]);
+        // console.log("\n");
+
+        // console.log(Object.keys(Object.values(options)[0])[0]);
+        // console.log("\n");
+        
+        // for(let i=0;i<Object.keys(Object.values(options)[0]).length;i++)
+        // {
+        //   console.log(Object.values(Object.values(options)[0])[i]);
+        // }
+        // console.log("\n");
+
+        // console.log(Object.values(Object.values(options)[0]));
+        // console.log("\n");
+
+        // console.log(Object.values(Object.values(options)[0])[0]);
+
+        // // console.log(Object.keys(req.body.options));
+
+        // let useroptons = req.body.options;
+        // console.log(useroptons);
+        // console.log(Object.keys(useroptons));
+        // console.log(Object.keys(useroptons)[0]);
+
+
+        // if(options.hasOwnProperty(Object.keys(useroptons)[0]))
+        // {
+        //   console.log("Yes");
+        // }
+        // else{
+        //   console.log("NO");
+        // }
+
+        // if (options.hasOwnProperty(req.body.options.prod_color)) {
+        //   if (
+        //     options[req.body.options.prod_color].hasOwnProperty(
+        //       req.body.options.prod_size
+        //     )
+        //   ) {
+        //     if (
+        //       options[req.body.options.prod_color][req.body.options.prod_size][
+        //         "quantity"
+        //       ] >= req.body.options.prod_quantity
+        //     ) {
+        //       var sql =
+        //         "INSERT INTO cart (user_id,prod_id, prod_price, options) VALUES ('" +
+        //         req.decoded.data.user_id +
+        //         "','" +
+        //         req.body.prod_id +
+        //         "','" +
+        //         result[0].price +
+        //         "','" +
+        //         JSON.stringify(req.body.options) +
+        //         "')";
+        //       con.query(sql, function (err, results) {
+        //         if (err) throw err;
+        //         res.status(200).send({ message: "success" });
+        //       });
+        //     } else {
+        //       res.status(400).send({ err: "Quantity Exceeded" });
+        //     }
+        //   } else {
+        //     res.status(404).send({ err: "not found" });
+        //   }
+        // } else {
+        //   res.status(404).send({ err: "not found" });
+        // }
       });
     } else {
       res.status(200).send({ err: "enter product id" });
@@ -250,6 +296,7 @@ orderRouter.post("/order", async (req, res) => {
                     "','" +
                     prodresult[0].name +
                     "','" +
+                    
                     cartOptions.prod_quantity +
                     "','" +
                     cartresult[i].prod_price +
