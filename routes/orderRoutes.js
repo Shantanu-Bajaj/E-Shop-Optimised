@@ -53,63 +53,124 @@ orderRouter.post("/add", (req, res) => {
         "SELECT * FROM products WHERE prod_id='" + req.body.prod_id + "'";
       con.query(query, function (err, result) {
         if (err) throw err;
+        console.log(result);
         var options = JSON.parse(result[0].options);
-        console.log(options);
-        console.log("\n");
-
+        let useroptions = req.body.options;
         console.log(Object.keys(options));
-        console.log("\n");
-        
         console.log(Object.values(options));
-        console.log("\n");
+        console.log(Object.keys(useroptions));
+        console.log(Object.values(useroptions));
+        var k;
+        for (let i = 0; i < Object.keys(options).length; i++) 
+        {
+          // console.log(Object.keys(Object.values(options)[0]));
+          k = 0;
+          console.log(Object.keys(useroptions)[k]);
+          if (options.hasOwnProperty(Object.keys(useroptions)[k])) 
+          {
+            //color
+            // console.log("always");
+            let flag2 = 1;
+            for (let j = 0;j < Object.keys(Object.values(options)[0]).length;j++) 
+            {
+              // console.log(Object.keys(Object.values(options)[i])[j]);
+              // console.log(Object.values(useroptions)[j]);
+              // console.log(Object.keys(Object.values(options)[0])[j]);
 
-        // console.log(Object.keys(options)[0]);
-        // console.log("\n");
+              // console.log(Object.keys(Object.values(options)[0])[j]);
+              // console.log(Object.values(useroptions)[k]);
+              if (Object.keys(Object.values(options)[0])[j] ==Object.values(useroptions)[k]) 
+              {
+                //blue==blue
+                flag2 = 2;
+                k++;
+                // console.log("Haa");
+                // console.log(Object.keys(useroptions)[j]);
+                // console.log(Object.values(useroptions)[j]);
+                // console.log(Object.keys(Object.values(options)[j])[j]);
+                // console.log(Object.values(Object.values(options)[0])[j]);
+                // console.log(Object.keys(useroptions)[j]);
+                if (Object.values(Object.values(options)[0])[j].hasOwnProperty(Object.keys(useroptions)[k])) 
+                {
+                  //size
+                  // console.log("YES");
+                  // console.log(Object.values(useroptions)[k]);
+                  console.log(Object.keys(Object.values(Object.values(Object.values(options)[0])[j])[0]));
+                  let flag = 1;
+                  for (let l = 0;l <Object.keys(Object.values(Object.values(Object.values(options)[0])[j])[0]).length;l++) 
+                  {
+                    // console.log(Object.keys(Object.values(Object.values(Object.values(options)[0])[j])[0])[l]);
+                    if (Object.keys(Object.values(Object.values(Object.values(options)[0])[j])[0])[l] == Object.values(useroptions)[k]) 
+                    {
+                      //XL==XL
+                      k++;
+                      // console.log("HAA BHAI");
+                      // console.log(Object.keys(useroptions)[k]);
+                      // console.log(Object.values(Object.values(Object.values(options)[0])[j])[0]);
+                      // console.log(Object.keys(Object.values(Object.values(Object.values(options)[0])[j])[0])[l]);
+                      if (Object.keys(Object.values(Object.values(Object.values(Object.values(options)[0])[j])[0])[l])[0] == Object.keys(useroptions)[k]) 
+                      {
+                        //quantity == quantity
+                        // console.log("HAO RE");
+                        console.log(Object.values(useroptions)[k]);
+                        console.log(Object.values(Object.values(Object.values(Object.values(Object.values(options)[0])[j])[0])[l])[0]);
+                        if (Object.values(useroptions)[k] >Object.values(Object.values(Object.values(Object.values(Object.values(options)[0])[j])[0])[l])[0]) 
+                        {
+                          res.status(400).send({ err: "Quantity Exceeded" });
+                        }
+                        else 
+                        {
+                          flag = 2;
+                          console.log("Available");
+                        }
+                      } 
+                      else 
+                      {
+                        res.status(404).send({ err: "not found" });
+                      }
+                    }
+                    // else
+                    // {
+                    //   console.log("NAHI BHAI");
+                    //   // res.status(404).send({ err: "not found" })
+                    // }
+                  }
+                  if (flag == 1) 
+                  {
+                    res.status(404).send({ err: "not found" });
+                  }
+                } 
+                else 
+                {
+                  res.status(404).send({ err: "not found" });
+                }
+              }
+              // else
+              // {
+              //   console.log("Nahi");
+              // }
+            }
+            if (flag2 == 1) 
+            {
+              res.status(404).send({ err: "not found" });
+            }
+          } 
+          else 
+          {
+            res.status(404).send({ err: "not found" });
+          }
+        }
 
-        // console.log(Object.values(options)[0]);
-        // console.log("\n");
-
-        // console.log(Object.keys(Object.values(options)[0])[0]);
-        // console.log("\n");
-        
         // for(let i=0;i<Object.keys(Object.values(options)[0]).length;i++)
         // {
+        //   console.log(Object.keys(Object.values(options)[0])[i]);
         //   console.log(Object.values(Object.values(options)[0])[i]);
-        // }
-        // console.log("\n");
-
-        // console.log(Object.values(Object.values(options)[0]));
-        // console.log("\n");
-
-        // console.log(Object.values(Object.values(options)[0])[0]);
-
-        // // console.log(Object.keys(req.body.options));
-
-        // let useroptons = req.body.options;
-        // console.log(useroptons);
-        // console.log(Object.keys(useroptons));
-        // console.log(Object.keys(useroptons)[0]);
-
-
-        // if(options.hasOwnProperty(Object.keys(useroptons)[0]))
-        // {
-        //   console.log("Yes");
-        // }
-        // else{
-        //   console.log("NO");
         // }
 
         // if (options.hasOwnProperty(req.body.options.prod_color)) {
-        //   if (
-        //     options[req.body.options.prod_color].hasOwnProperty(
-        //       req.body.options.prod_size
-        //     )
-        //   ) {
-        //     if (
-        //       options[req.body.options.prod_color][req.body.options.prod_size][
-        //         "quantity"
-        //       ] >= req.body.options.prod_quantity
-        //     ) {
+        //   if (options[req.body.options.prod_color].hasOwnProperty(req.body.options.prod_size))
+        //  {
+        //     if (options[req.body.options.prod_color][req.body.options.prod_size]["quantity"] >= req.body.options.prod_quantity) {
         //       var sql =
         //         "INSERT INTO cart (user_id,prod_id, prod_price, options) VALUES ('" +
         //         req.decoded.data.user_id +
@@ -134,7 +195,9 @@ orderRouter.post("/add", (req, res) => {
         //   res.status(404).send({ err: "not found" });
         // }
       });
-    } else {
+    } 
+    else 
+    {
       res.status(200).send({ err: "enter product id" });
     }
   }
@@ -296,7 +359,6 @@ orderRouter.post("/order", async (req, res) => {
                     "','" +
                     prodresult[0].name +
                     "','" +
-                    
                     cartOptions.prod_quantity +
                     "','" +
                     cartresult[i].prod_price +
@@ -393,12 +455,10 @@ orderRouter.post("/order", async (req, res) => {
         if (error) {
           res.send(error);
         } else {
-          res
-            .status(200)
-            .send({
-              message: "Order placed! An email has been sent to you.",
-              data: lastorder,
-            });
+          res.status(200).send({
+            message: "Order placed! An email has been sent to you.",
+            data: lastorder,
+          });
         }
       });
     } else {
