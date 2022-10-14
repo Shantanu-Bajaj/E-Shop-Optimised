@@ -4,7 +4,6 @@ import con from "../db.js";
 import util from "util";
 const query = util.promisify(con.query).bind(con);
 import transporter from "../triggerEmail.js";
-import { CLIENT_RENEG_LIMIT } from "tls";
 
 orderRouter.get("/", (req, res) => {
   var sql =
@@ -53,7 +52,6 @@ orderRouter.post("/add", (req, res) => {
         "SELECT * FROM products WHERE prod_id='" + req.body.prod_id + "'";
       con.query(query, function (err, result) {
         if (err) throw err;
-        console.log(result);
         var options = JSON.parse(result[0].options);
         let useroptions = req.body.options;
         console.log(Object.keys(options));
@@ -69,7 +67,7 @@ orderRouter.post("/add", (req, res) => {
           if (options.hasOwnProperty(Object.keys(useroptions)[k])) 
           {
             //color
-            // console.log("always");
+            console.log("always");
             let flag2 = 1;
             for (let j = 0;j < Object.keys(Object.values(options)[0]).length;j++) 
             {
@@ -84,7 +82,7 @@ orderRouter.post("/add", (req, res) => {
                 //blue==blue
                 flag2 = 2;
                 k++;
-                // console.log("Haa");
+                console.log("Haa");
                 // console.log(Object.keys(useroptions)[j]);
                 // console.log(Object.values(useroptions)[j]);
                 // console.log(Object.keys(Object.values(options)[j])[j]);
@@ -93,7 +91,7 @@ orderRouter.post("/add", (req, res) => {
                 if (Object.values(Object.values(options)[0])[j].hasOwnProperty(Object.keys(useroptions)[k])) 
                 {
                   //size
-                  // console.log("YES");
+                  console.log("YES");
                   // console.log(Object.values(useroptions)[k]);
                   console.log(Object.keys(Object.values(Object.values(Object.values(options)[0])[j])[0]));
                   let flag = 1;
@@ -104,24 +102,30 @@ orderRouter.post("/add", (req, res) => {
                     {
                       //XL==XL
                       k++;
-                      // console.log("HAA BHAI");
+                      console.log("HAA BHAI");
                       // console.log(Object.keys(useroptions)[k]);
                       // console.log(Object.values(Object.values(Object.values(options)[0])[j])[0]);
                       // console.log(Object.keys(Object.values(Object.values(Object.values(options)[0])[j])[0])[l]);
                       if (Object.keys(Object.values(Object.values(Object.values(Object.values(options)[0])[j])[0])[l])[0] == Object.keys(useroptions)[k]) 
                       {
                         //quantity == quantity
-                        // console.log("HAO RE");
-                        console.log(Object.values(useroptions)[k]);
-                        console.log(Object.values(Object.values(Object.values(Object.values(Object.values(options)[0])[j])[0])[l])[0]);
-                        if (Object.values(useroptions)[k] >Object.values(Object.values(Object.values(Object.values(Object.values(options)[0])[j])[0])[l])[0]) 
-                        {
-                          res.status(400).send({ err: "Quantity Exceeded" });
-                        }
-                        else 
+                        console.log("HAO RE");
+                        // console.log(Object.values(useroptions)[k]);
+                        // console.log(Object.values(Object.values(Object.values(Object.values(Object.values(options)[0])[j])[0])[l])[0]);
+                        if (Object.values(Object.values(Object.values(Object.values(Object.values(options)[0])[j])[0])[l])[0] >= Object.values(useroptions)[k]) 
                         {
                           flag = 2;
-                          console.log("Available");
+                          var sql = "INSERT INTO cart (user_id,prod_id, prod_price, options) VALUES ('" +req.decoded.data.user_id +"','" +req.body.prod_id +"','" +result[0].price +"','" +JSON.stringify(req.body.options) +"')";
+                          con.query(sql, function (err, results) {
+                            if (err) throw err;
+                            res.status(200).send({ message: "success",data: results });
+                            });
+                            console.log("Available"); 
+                        }
+                        else       
+                        {
+                          flag =0 
+                          res.status(400).send({ err: "Quantity Exceeded" });
                         }
                       } 
                       else 
@@ -152,6 +156,7 @@ orderRouter.post("/add", (req, res) => {
             }
             if (flag2 == 1) 
             {
+              flag2 = 0
               res.status(404).send({ err: "not found" });
             }
           } 

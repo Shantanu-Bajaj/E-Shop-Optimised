@@ -117,23 +117,33 @@ addressRouter.post(
   }
 );
 
-addressRouter.put(
-  "/update",
-  (req, res) => {
-    for (let i = 0; i < Object.keys(req.body).length; i++) {
-      var sql =
-        "UPDATE useraddresses SET " +
-        Object.keys(req.body)[i] +
-        "='" +
-        Object.values(req.body)[i] +
-        "' WHERE id='" +
-        req.query.id +
-        "'";
-      con.query(sql, function (err, result) {
-        if (err) throw err;
-        res.status(200).send({ message: "success" });
-      });
+addressRouter.put("/update",(req, res) => {
+  var addsql = "SELECT * FROM useraddresses where user_id='" + req.decoded.data.user_id + "' and id='" + req.query.id + "'";
+  con.query(addsql,function(err,addresult){
+    if (err) throw err;
+    if(!addresult.length) res.status(404).send({err:"not found"})
+    else
+    {
+      for (let i = 0; i < Object.keys(req.body).length; i++) {
+        var sql =
+          "UPDATE useraddresses SET " +
+          Object.keys(req.body)[i] +
+          "='" +
+          Object.values(req.body)[i] +
+          "' WHERE id='" +
+          req.query.id +
+          "'";
+        con.query(sql, function (err, result) {
+          if (err) throw err;
+          var upsql = "SELECT * FROM useraddresses where id='" + req.query.id + "'";
+          con.query(upsql,function(err, upresult){
+            if (err) throw err;
+            res.status(200).send({ message: "success", data:upresult[0] });
+          })
+        });
+      }
     }
+  })
   }
 );
 
