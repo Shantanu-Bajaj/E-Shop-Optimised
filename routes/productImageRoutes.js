@@ -2,9 +2,6 @@ import express from "express";
 import util from "util";
 import con from "../db.js";
 import fs from "fs";
-import { CLIENT_RENEG_LIMIT } from "tls";
-import { isNull } from "util";
-import e from "express";
 
 const productImageRouter = express.Router();
 const query = util.promisify(con.query).bind(con);
@@ -13,9 +10,8 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
   if (req.params.prod_id == ":prod_id") res.status(200).send({ err: "please enter product id" });
   else 
   {
-    let prodsql = "SELECT * FROM products where prod_id='" + req.params.prod_id + "'";
-    let prodresult = await query(prodsql);
-    let prodoptions = JSON.parse(prodresult[0].options);
+    var prodsql = "SELECT * FROM products where prod_id='" + req.params.prod_id + "'";
+    var prodresult = await query(prodsql);
     if (!prodresult.length) res.status(404).send({ err: "not found" });
     else {
       let files = req.files;
@@ -26,8 +22,9 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
         let name = files[i].fieldname;
         let data = files[i].buffer;
         let inpoptions = file_array.reduceRight((all, item) => ({ [item]: all }),{});
-        if (prodoptions != "undefined") 
+        if (prodresult[0].options != "undefined") 
         {
+          var prodoptions = JSON.parse(prodresult[0].options);
           console.log(inpoptions);
         } 
         else 

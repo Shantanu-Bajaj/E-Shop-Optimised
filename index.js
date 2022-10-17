@@ -7,7 +7,8 @@ import adminAuthRouter from "./routes/adminAuthRoutes.js";
 import userAuthRouter from "./routes/userAuthRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import adminProductRouter from "./routes/adminProductRoutes.js";
-import productImageRouter from "./routes/productImageRouter.js";
+import productImageRouter from "./routes/productImageRoutes.js";
+import userProductRouter from "./routes/userProductRoutes.js";
 import userAuthentication from "./middlewares/userAuthentication.js";
 import adminAuthentication from "./middlewares/adminAuthentication.js";
 import openRouter from "./routes/openRoutes.js";
@@ -28,6 +29,7 @@ app.use("/admin", adminAuthentication, adminAuthRouter);
 app.use("/user/address", userAuthentication, addressRouter);
 app.use("/user/cart", userAuthentication, orderRouter);
 app.use("/admin/products", adminAuthentication, adminProductRouter);
+app.use("/user/products", userAuthentication, userProductRouter);
 app.use("/admin/products/images", adminAuthentication, productImageRouter);
 
 
