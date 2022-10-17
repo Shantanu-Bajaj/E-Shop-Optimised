@@ -306,105 +306,231 @@ orderRouter.put("/update", (req, res) => {
 });
 
 orderRouter.post("/order", async (req, res) => {
-  var sql =
-    "SELECT * FROM cart WHERE user_id ='" + req.decoded.data.user_id + "'";
+  var sql ="SELECT * FROM cart WHERE user_id ='" + req.decoded.data.user_id + "'";
   let cartresult = await query(sql);
   if (!cartresult.length) res.status(400).send({ err: "Cart is Empty" });
   else {
-    var addsql =
-      "SELECT id FROM useraddresses WHERE user_id ='" +
-      req.decoded.data.user_id +
-      "'";
+    var addsql ="SELECT id FROM useraddresses WHERE user_id ='" +req.decoded.data.user_id +"'";
     let addresses = await query(addsql);
     let addressesid = [];
     for (let i = 0; i < addresses.length; i++) {
       addressesid[i] = addresses[i].id.toString();
     }
     if (addressesid.includes(req.query.address_id)) {
-      var ordersql =
-        "INSERT INTO orders (user_id, address_id) VALUES ('" +
-        req.decoded.data.user_id +
-        "', '" +
-        req.query.address_id +
-        "')";
+      var ordersql ="INSERT INTO orders (user_id, address_id) VALUES ('" +req.decoded.data.user_id +"', '" +req.query.address_id +"')";
       let orderresult = await query(ordersql);
-      var oritemssql =
-        "SELECT id FROM orders WHERE user_id = '" +
-        req.decoded.data.user_id +
-        "'";
+      var oritemssql ="SELECT id FROM orders WHERE user_id = '" +req.decoded.data.user_id +"'";
       let orderid = await query(oritemssql);
+      console.log(cartresult.length);
       for (let i = 0; i < cartresult.length; i++) {
-        var sql1 =
-          "SELECT * FROM products WHERE prod_id='" +
-          cartresult[i].prod_id +
-          "'";
+        var sql1 ="SELECT * FROM products WHERE prod_id='" +cartresult[i].prod_id +"'";
         let prodresult = await query(sql1);
         if (!prodresult.length)
+        {
+          console.log("1");
           res.status(404).send({ err: "currently unavailable" });
+        } 
         else {
-          if (cartresult[i].options) {
+          console.log("2");
+          // console.log(cartOptions);
+          if (cartresult[i].options) 
+          {
             var prodOptions = JSON.parse(prodresult[0].options);
             var cartOptions = JSON.parse(cartresult[i].options);
-            if (prodOptions.hasOwnProperty(cartOptions.prod_color)) {
-              if (
-                prodOptions[cartOptions.prod_color].hasOwnProperty(
-                  cartOptions.prod_size
-                )
-              ) {
-                if (
-                  prodOptions[cartOptions.prod_color][cartOptions.prod_size][
-                    "quantity"
-                  ] >= cartOptions.prod_quantity
-                ) {
-                  var amount =
-                    cartOptions.prod_quantity * cartresult[i].prod_price;
-                  var SQL =
-                    "INSERT INTO orderitems(order_id, prod_name, prod_quantity, prod_price, options, total) VALUES('" +
-                    orderid[orderid.length - 1].id +
-                    "','" +
-                    prodresult[0].name +
-                    "','" +
-                    cartOptions.prod_quantity +
-                    "','" +
-                    cartresult[i].prod_price +
-                    "','" +
-                    JSON.stringify(cartOptions) +
-                    "','" +
-                    amount +
-                    "')";
-                  let orderitemsresult = await query(SQL);
-                  var newQuantity =
-                    prodOptions[cartOptions.prod_color][cartOptions.prod_size][
-                      "quantity"
-                    ] - cartOptions.prod_quantity;
-                  prodOptions[cartOptions.prod_color][cartOptions.prod_size][
-                    "quantity"
-                  ] = newQuantity;
-                  var prodsql =
-                    "UPDATE products SET options='" +
-                    JSON.stringify(prodOptions) +
-                    "' WHERE prod_id='" +
-                    cartresult[i].prod_id +
-                    "'";
-                  let productresult = await query(prodsql);
-                  var cartsql =
-                    "DELETE FROM cart WHERE id='" + cartresult[i].id + "'";
-                  let cartdeleteresult = await query(cartsql);
-                } else {
-                  res.status(400).send({ err: "Quantity Exceeded" });
+            console.log("3");
+            // console.log(Object.keys(prodOptions));
+            // console.log(Object.values(prodOptions));
+            // console.log(Object.keys(cartOptions));
+            // console.log(Object.values(cartOptions));
+            var k;
+            for (let z = 0; z < Object.keys(prodOptions).length; z++) 
+            {
+              // console.log(Object.keys(Object.values(options)[0]));
+              k = 0;
+              // console.log(Object.keys(cartOptions)[k]);
+              if (prodOptions.hasOwnProperty(Object.keys(cartOptions)[k])) 
+              {
+                //color
+                console.log("always");
+                let flag2 = 1;
+                for (let j = 0;j < Object.keys(Object.values(prodOptions)[0]).length;j++) 
+                {
+                  // console.log(Object.keys(Object.values(options)[i])[j]);
+                  // console.log(Object.values(useroptions)[j]);
+                  // console.log(Object.keys(Object.values(options)[0])[j]);
+
+                  // console.log(Object.keys(Object.values(options)[0])[j]);
+                  // console.log(Object.values(useroptions)[k]);
+                  if (Object.keys(Object.values(prodOptions)[0])[j] ==Object.values(cartOptions)[k]) 
+                  {
+                    //blue==blue
+                    flag2 = 2;
+                    k++;
+                    console.log("Haa");
+                    // console.log(Object.keys(useroptions)[j]);
+                    // console.log(Object.values(useroptions)[j]);
+                    // console.log(Object.keys(Object.values(options)[j])[j]);
+                    // console.log(Object.values(Object.values(options)[0])[j]);
+                    // console.log(Object.keys(useroptions)[j]);
+                    if (Object.values(Object.values(prodOptions)[0])[j].hasOwnProperty(Object.keys(cartOptions)[k])) 
+                    {
+                      //size
+                      console.log("YES");
+                      // console.log(Object.values(useroptions)[k]);
+                      console.log(Object.keys(Object.values(Object.values(Object.values(prodOptions)[0])[j])[0]));
+                      let flag = 1;
+                      for (let l = 0;l <Object.keys(Object.values(Object.values(Object.values(prodOptions)[0])[j])[0]).length;l++) 
+                      {
+                        // console.log(Object.keys(Object.values(Object.values(Object.values(options)[0])[j])[0])[l]);
+                        if (Object.keys(Object.values(Object.values(Object.values(prodOptions)[0])[j])[0])[l] == Object.values(cartOptions)[k]) 
+                        {
+                          //XL==XL
+                          k++;
+                          console.log("HAA BHAI");
+                          // console.log(Object.keys(useroptions)[k]);
+                          // console.log(Object.values(Object.values(Object.values(options)[0])[j])[0]);
+                          // console.log(Object.keys(Object.values(Object.values(Object.values(options)[0])[j])[0])[l]);
+                          if (Object.keys(Object.values(Object.values(Object.values(Object.values(prodOptions)[0])[j])[0])[l])[0] == Object.keys(cartOptions)[k]) 
+                          {
+                            //quantity == quantity
+                            console.log("HAO RE");
+                            // console.log(Object.values(useroptions)[k]);
+                            // console.log(Object.values(Object.values(Object.values(Object.values(Object.values(options)[0])[j])[0])[l])[0]);
+                            if (Object.values(Object.values(Object.values(Object.values(Object.values(prodOptions)[0])[j])[0])[l])[0] >= Object.values(cartOptions)[k]) 
+                            {
+                              let newk = k;
+                              flag = 2;
+                              console.log("Available"); 
+                              var amount = Object.values(cartOptions)[k] * cartresult[i].prod_price;
+                              var SQL ="INSERT INTO orderitems(order_id, prod_name, prod_price, options, total) VALUES('" +
+                                orderid[orderid.length - 1].id +
+                                "','" +
+                                prodresult[0].name +
+                                "','" +
+                                cartresult[i].prod_price +
+                                "','" +
+                                JSON.stringify(cartOptions) +
+                                "','" +
+                                amount +
+                                "')";
+                              let orderitemsresult = await query(SQL);
+                              var newQuantity = Object.values(Object.values(Object.values(Object.values(Object.values(prodOptions)[0])[j])[0])[l])[0] - Object.values(cartOptions)[k];
+                              // console.log(prodOptions[Object.keys(cartOptions)[k-2]][Object.values(cartOptions)[k-2]][Object.keys(cartOptions)[k-1]][Object.values(cartOptions)[k-1]]["quantity"]);
+                              // console.log(prodOptions[Object.keys(cartOptions)[k-k]][Object.values(cartOptions)[k-k]][Object.keys(cartOptions)[k- --k]][Object.values(cartOptions)[k]]["quantity"]);
+                              prodOptions[Object.keys(cartOptions)[k-k]][Object.values(cartOptions)[k-k]][Object.keys(cartOptions)[k- --k]][Object.values(cartOptions)[k]]["quantity"] = newQuantity;
+                              var prodsql ="UPDATE products SET options='" +
+                                JSON.stringify(prodOptions) +
+                                "' WHERE prod_id='" +
+                                cartresult[i].prod_id +
+                                "'";
+                              let productresult = await query(prodsql);
+                              var cartsql =
+                                "DELETE FROM cart WHERE id='" + cartresult[i].id + "'";
+                              let cartdeleteresult = await query(cartsql);
+                            }
+                            else       
+                            {
+                              flag =0 
+                              res.status(400).send({ err: "Quantity Exceeded" });
+                            }
+                          } 
+                          else 
+                          {
+                            res.status(404).send({ err: "not found" });
+                          }
+                        }
+                        // else
+                        // {
+                        //   console.log("NAHI BHAI");
+                        //   // res.status(404).send({ err: "not found" })
+                        // }
+                      }
+                      if (flag == 1) 
+                      {
+                        res.status(404).send({ err: "not found" });
+                      }
+                    } 
+                    else 
+                    {
+                      res.status(404).send({ err: "not found" });
+                    }
+                  }
+                  // else
+                  // {
+                  //   console.log("Nahi");
+                  // }
                 }
-              } else {
-                res.status(404).send({ err: "currently unavailable" });
+                if (flag2 == 1) 
+                {
+                  flag2 = 0
+                  res.status(404).send({ err: "not found" });
+                }
+              } 
+              else 
+              {
+                res.status(404).send({ err: "not found" });
               }
-            } else {
-              res.status(404).send({ err: "currently unavailable" });
             }
-          } else {
-            if (cartresult[i].prod_quantity <= prodresult[0].stock) {
-              var amount =
-                cartresult[i].prod_quantity * cartresult[i].prod_price;
-              var SQL =
-                "INSERT INTO orderitems(order_id, prod_name, prod_quantity, prod_price, total) VALUES('" +
+            // if (prodOptions.hasOwnProperty(cartOptions.prod_color)) 
+            // {
+            //   console.log("4");
+            //   if (prodOptions[cartOptions.prod_color].hasOwnProperty(cartOptions.prod_size)) 
+            //   {
+            //     console.log("5");
+            //     if (prodOptions[cartOptions.prod_color][cartOptions.prod_size]["quantity"] >= cartOptions.prod_quantity) 
+            //     {
+            //       console.log("6");
+            //       var amount =cartOptions.prod_quantity * cartresult[i].prod_price;
+            //       var SQL ="INSERT INTO orderitems(order_id, prod_name, prod_quantity, prod_price, options, total) VALUES('" +
+            //         orderid[orderid.length - 1].id +
+            //         "','" +
+            //         prodresult[0].name +
+            //         "','" +
+            //         cartOptions.prod_quantity +
+            //         "','" +
+            //         cartresult[i].prod_price +
+            //         "','" +
+            //         JSON.stringify(cartOptions) +
+            //         "','" +
+            //         amount +
+            //         "')";
+            //       let orderitemsresult = await query(SQL);
+            //       var newQuantity =prodOptions[cartOptions.prod_color][cartOptions.prod_size]["quantity"] - cartOptions.prod_quantity;
+            //       prodOptions[cartOptions.prod_color][cartOptions.prod_size]["quantity"] = newQuantity;
+            //       var prodsql ="UPDATE products SET options='" +
+            //         JSON.stringify(prodOptions) +
+            //         "' WHERE prod_id='" +
+            //         cartresult[i].prod_id +
+            //         "'";
+            //       let productresult = await query(prodsql);
+            //       var cartsql =
+            //         "DELETE FROM cart WHERE id='" + cartresult[i].id + "'";
+            //       let cartdeleteresult = await query(cartsql);
+            //     } 
+            //     else 
+            //     {
+            //       console.log("7");
+            //       res.status(400).send({ err: "Quantity Exceeded" });
+            //     }
+            //   } 
+            //   else 
+            //   {
+            //     console.log("8");
+            //     res.status(404).send({ err: "currently unavailable" });
+            //   }
+            // } 
+            // else 
+            // {
+            //   console.log("9");
+            //   res.status(404).send({ err: "currently unavailable" });
+            // }
+          } 
+          else 
+          {
+            if (cartresult[i].prod_quantity <= prodresult[0].stock) 
+            {
+              var amount =cartresult[i].prod_quantity * cartresult[i].prod_price;
+              var SQL ="INSERT INTO orderitems(order_id, prod_name, prod_quantity, prod_price, total) VALUES('" +
                 orderid[orderid.length - 1].id +
                 "','" +
                 prodresult[0].name +
@@ -416,20 +542,19 @@ orderRouter.post("/order", async (req, res) => {
                 amount +
                 "')";
               let orderitemsresult = await query(SQL);
-              var newQuantity =
-                prodresult[0].stock - cartresult[i].prod_quantity;
+              var newQuantity =prodresult[0].stock - cartresult[i].prod_quantity;
               prodresult[0].stock = newQuantity;
-              var prodsql =
-                "UPDATE products SET stock='" +
+              var prodsql ="UPDATE products SET stock='" +
                 prodresult[0].stock +
                 "' WHERE prod_id='" +
                 cartresult[i].prod_id +
                 "'";
               let updateprodsql = await query(prodsql);
-              var cartsql =
-                "DELETE FROM cart WHERE id='" + cartresult[i].id + "'";
+              var cartsql ="DELETE FROM cart WHERE id='" + cartresult[i].id + "'";
               let deletecartsql = await query(cartsql);
-            } else {
+            } 
+            else 
+            {
               res.status(400).send({ err: "Quantity Exceeded" });
             }
           }
@@ -437,14 +562,10 @@ orderRouter.post("/order", async (req, res) => {
       }
       let orders = [];
       let lastorder = [];
-      var sql =
-        "SELECT * FROM orders WHERE user_id = '" +
-        req.decoded.data.user_id +
-        "'";
+      var sql ="SELECT * FROM orders WHERE user_id = '" +req.decoded.data.user_id +"'";
       orders = await query(sql);
       lastorder = orders[orders.length - 1];
-      let oritemsql =
-        "SELECT * FROM orderitems where order_id = '" + lastorder.id + "'";
+      let oritemsql ="SELECT * FROM orderitems where order_id = '" + lastorder.id + "'";
       let orderitems = await query(oritemsql);
       lastorder["items"] = orderitems;
       orderitems.forEach((item) => {
@@ -457,19 +578,15 @@ orderRouter.post("/order", async (req, res) => {
         html: `<h3><p>Your order has been placed! It will arrive in 5-6 working days. If not feel free to contact us.</p> <p>Thank you for shopping with us.</p> <p>Have a good day!</p></h3>`,
       };
       transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          res.send(error);
-        } else {
-          res.status(200).send({
-            message: "Order placed! An email has been sent to you.",
-            data: lastorder,
-          });
+        if (error) res.send(error);
+        else {
+          res.status(200).send({message: "Order placed! An email has been sent to you.",data: lastorder,});
         }
       });
-    } else {
-      res
-        .status(404)
-        .send({ err: "No such address found! Please add a new address" });
+    } 
+    else 
+    {
+      res.status(404).send({ err: "No such address found! Please add a new address" });
     }
   }
 });
