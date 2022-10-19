@@ -22,7 +22,6 @@ app.use(bodyParser.json());
 // app.use(multer().array());
 app.use(multer().any());
 app.use(cors());
-
 app.use("/", openRouter);
 app.use("/user", userAuthentication, userAuthRouter);
 app.use("/admin", adminAuthentication, adminAuthRouter);

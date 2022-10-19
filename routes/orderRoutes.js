@@ -10,7 +10,7 @@ orderRouter.get("/", (req, res) => {
     "SELECT * FROM cart WHERE user_id='" + req.decoded.data.user_id + "'";
   con.query(sql, function (err, result) {
     if (err) throw err;
-    if (!result.length) res.status(404).send({ err: "Cart is empty" });
+    if (!result.length) res.status(200).send({ err: "Cart is empty" });
     else {
       res.status(200).send(result);
     }

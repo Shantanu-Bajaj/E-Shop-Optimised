@@ -2,6 +2,7 @@ import express from "express";
 import util from "util";
 import con from "../db.js";
 import fs from "fs";
+import { v2 as cloudinary } from 'cloudinary';
 
 const productImageRouter = express.Router();
 const query = util.promisify(con.query).bind(con);
@@ -15,13 +16,29 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
     if (!prodresult.length) res.status(404).send({ err: "not found" });
     else {
       let files = req.files;
-      for (let i = 0; i < files.length; i++) 
+
+      for (let i = 0; i <= files.length; i++) 
       {
-        let file_array = files[i].fieldname.split(".");
-        let file_ext = files[i].originalname.split(".")[1];
-        let name = files[i].fieldname;
-        let data = files[i].buffer;
-        let inpoptions = file_array.reduceRight((all, item) => ({ [item]: all }),{});
+        var file_array = files[i].fieldname.split(".");
+        var file_ext = files[i].originalname.split(".")[1];
+        var name = files[i].fieldname;
+        var data = files[i].buffer;
+        var inpoptions = file_array.reduceRight((all, item) => ({ [item]: all }),{});
+
+        var imagesql = "INSERT INTO images(prod_id,image_extension) VALUES('" +req.params.prod_id +"','" +file_ext +"')";
+        // var path ="D:OrtiganInternshipE-Shop-OptimisedprodImages " +req.files[0].fieldname;          
+          let imageresult = await query(imagesql);
+          fs.writeFile(name + "." + file_ext, data, (err) => {
+            if (err) throw err;
+            console.log("Saved!");
+            cloudinary.uploader.upload(name + "." + file_ext, {resource_type:"image",folder: "/Home/Ortigan_Assets",use_filename:true, unique_filename:true})
+            .then((result) =>{
+              console.log(result);
+            })
+            .catch((error)=>{
+              console.log(error);
+            })
+          });
         if (prodresult[0].options != "undefined") 
         {
           var prodoptions = JSON.parse(prodresult[0].options);
@@ -29,13 +46,8 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
         } 
         else 
         {
-          // var path ="D:OrtiganInternshipE-Shop-OptimisedprodImages " +req.files[0].fieldname;          
-          let imagesql = "INSERT INTO images(prod_id,image_extension) VALUES('" +req.params.prod_id +"','" +file_ext +"')";
-          let imageresult = await query(imagesql);
-          fs.writeFile(name + "." + file_ext, data, function (err) {
-            if (err) throw err;
-            console.log("Saved!");
-          });
+          console.log(inpoptions);
+            
 
         }
       }
