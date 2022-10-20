@@ -39,8 +39,8 @@ orderRouter.post("/add", (req, res) => {
             "')";
           con.query(sql, function (err, results) {
             if (err) throw err;
+            res.status(200).send({ message: "success",data:results});
           });
-          res.status(200).send({ message: "success" });
         }
       });
     } else {
