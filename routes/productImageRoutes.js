@@ -8,6 +8,12 @@ const productImageRouter = express.Router();
 const query = util.promisify(con.query).bind(con);
 const fs_writeFile = util.promisify(fs.writeFile);
 
+async function updateOptions(req,options){
+  var prodsql ="UPDATE products SET options='" +JSON.stringify(options) +"' WHERE prod_id='" +req.params.prod_id +"'";
+  let productresult = await query(prodsql);
+  return productresult;
+}
+
 productImageRouter.post("/:prod_id/add", async (req, res) => {
   if (req.params.prod_id == ":prod_id") res.status(200).send({ err: "please enter product id" });
   else 
@@ -43,16 +49,15 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
                   let tempobj = {}
                   tempobj[id] = url;
                   console.log(tempobj);                 
-
-                  Object.assign(options[Object.keys(inpoptions)[0]][Object.keys(Object.values(inpoptions)[0])[0]][Object.keys(Object.values(Object.values(inpoptions)[0])[0])[0]][Object.keys(Object.values(Object.values(Object.values(inpoptions)[0])[0])[0])[0]]["images"],tempobj);
                   
-                  var prodsql ="UPDATE products SET options='" +
-                                JSON.stringify(options) +
-                                "' WHERE prod_id='" +
-                                req.params.prod_id +
-                                "'";
-                              let productresult = await query(prodsql);
-                              console.log(ind,prodresult);
+                  let tempoptions = options;
+
+                  Object.assign(tempoptions[Object.keys(inpoptions)[0]][Object.keys(Object.values(inpoptions)[0])[0]][Object.keys(Object.values(Object.values(inpoptions)[0])[0])[0]][Object.keys(Object.values(Object.values(Object.values(inpoptions)[0])[0])[0])[0]]["images"],tempobj);
+                  console.log(options[Object.keys(inpoptions)[0]][Object.keys(Object.values(inpoptions)[0])[0]][Object.keys(Object.values(Object.values(inpoptions)[0])[0])[0]]);
+
+                  options = tempoptions;
+
+
                 })
                 .catch((error) => {
                   console.log(error);
@@ -82,6 +87,7 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
             });
         }
       }
+      let productresult = await updateOptions(req,options);
     }
   }
 
