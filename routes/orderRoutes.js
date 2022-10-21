@@ -356,7 +356,7 @@ orderRouter.put("/update", (req, res) => {
               "'";
             con.query(sql, function (err, result) {
               if (err) throw err;
-              res.status(200).send({ message: "success" });
+              res.status(200).send({ message: "success", data:result});
             });
           }
         } else {
@@ -374,7 +374,7 @@ orderRouter.put("/update", (req, res) => {
             con.query(sql, function (err, result) {
               if (err) throw err;
             });
-            res.status(200).send({ message: "success" });
+            res.status(200).send({ message: "success", data:result });
           });
         }
       }
