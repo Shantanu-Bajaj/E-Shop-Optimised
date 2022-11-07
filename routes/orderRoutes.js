@@ -57,7 +57,7 @@ orderRouter.post("/add", (req, res) => {
                 console.log(newprodresult);
                 res
                   .status(200)
-                  .send({ message: "success", data: newprodresult });
+                  .send({ message: "success", data: newprodresult[0] });
               });
             });
           });
@@ -208,7 +208,7 @@ orderRouter.post("/add", (req, res) => {
                                       .status(200)
                                       .send({
                                         message: "success",
-                                        data: newprodresult,
+                                        data: newprodresult[0],
                                       });
                                   }
                                 );
