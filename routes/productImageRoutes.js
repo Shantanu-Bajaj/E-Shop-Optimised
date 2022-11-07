@@ -24,6 +24,7 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
     else 
     {
       let files = req.files;
+      var tempoptions;
       for (let ind = 0; ind < files.length; ind++) 
       {
         var file_array = files[ind].fieldname.split(".");
@@ -50,13 +51,10 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
                   tempobj[id] = url;
                   console.log(tempobj);                 
                   
-                  let tempoptions = options;
-
-                  Object.assign(tempoptions[Object.keys(inpoptions)[0]][Object.keys(Object.values(inpoptions)[0])[0]][Object.keys(Object.values(Object.values(inpoptions)[0])[0])[0]][Object.keys(Object.values(Object.values(Object.values(inpoptions)[0])[0])[0])[0]]["images"],tempobj);
+                  // tempoptions = options;
+                  Object.assign(options[Object.keys(inpoptions)[0]][Object.keys(Object.values(inpoptions)[0])[0]][Object.keys(Object.values(Object.values(inpoptions)[0])[0])[0]][Object.keys(Object.values(Object.values(Object.values(inpoptions)[0])[0])[0])[0]]["images"],tempobj);
                   console.log(options[Object.keys(inpoptions)[0]][Object.keys(Object.values(inpoptions)[0])[0]][Object.keys(Object.values(Object.values(inpoptions)[0])[0])[0]]);
-
-                  options = tempoptions;
-
+                  let productresult = await updateOptions(req,options);
 
                 })
                 .catch((error) => {
@@ -87,7 +85,6 @@ productImageRouter.post("/:prod_id/add", async (req, res) => {
             });
         }
       }
-      let productresult = await updateOptions(req,options);
     }
   }
 

@@ -12,7 +12,11 @@ orderRouter.get("/", (req, res) => {
     if (err) throw err;
     if (!result.length) res.status(200).send({ err: "Cart is empty" });
     else {
-      res.status(200).send(result);
+      var newsql = "SELECT * FROM products where prod_id='" + result[0].prod_id + "'";
+      con.query(newsql,function(err,results){
+        if (err) throw err;
+        res.status(200).send(results);
+      })
     }
   });
 });
