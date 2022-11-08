@@ -15,7 +15,7 @@ orderRouter.get("/", (req, res) => {
       var newsql = "SELECT * FROM products where prod_id='" + result[0].prod_id + "'";
       con.query(newsql,function(err,results){
         if (err) throw err;
-        res.status(200).send(results);
+        res.status(200).send(result,results);
       })
     }
   });
