@@ -7,17 +7,12 @@ import transporter from "../triggerEmail.js";
 
 orderRouter.get("/", (req, res) => {
   var sql =
-    "SELECT * FROM cart WHERE user_id='" + req.decoded.data.user_id + "'";
+    "SELECT * FROM cart INNER JOIN products on cart.prod_id = products.prod_id WHERE user_id='" + req.decoded.data.user_id + "'";
   con.query(sql, function (err, result) {
     if (err) throw err;
     if (!result.length) res.status(200).send({ err: "Cart is empty" });
     else {
-      var newsql = "SELECT * FROM products where prod_id='" + result[0].prod_id + "'";
-      con.query(newsql,function(err,results){
-        if (err) throw err;
-        let allres = Object.assign(result[0],results[0])
-        res.status(200).send(allres);
-      })
+      res.status(200).send(result);
     }
   });
 });
