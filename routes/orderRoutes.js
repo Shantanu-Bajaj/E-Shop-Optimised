@@ -356,7 +356,11 @@ orderRouter.put("/update", (req, res) => {
               "'";
             con.query(sql, function (err, result) {
               if (err) throw err;
-              res.status(200).send({ message: "success", data:result});
+              let newsql = "SELECT * FROM cart INNER JOIN products on cart.prod_id = products.prod_id WHERE user_id='" + req.decoded.data.user_id + "' and id='" +req.query.id+"'"; 
+              con.query(newsql,function(err,resultss){
+                if (err) throw err;
+                res.status(200).send({ message: "success", data:resultss[0]});
+              })
             });
           }
         } else {
